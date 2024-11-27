@@ -84,7 +84,7 @@ cudaError_t geluWithCuda(float* c, float* a, int* b, unsigned int output_size_i,
     // Launch a kernel on the GPU with one thread for each element.
     // avgGeluKernel<<<dim3(1,1), dim3(output_size_i, output_size_j)>>>(dev_c, dev_a, dev_b);
 
-    geluKernel << <dim3(output_size_i / 4, output_size_j / 4), dim3(4, 4) >> > (dev_c, dev_a, dev_b);
+    geluKernel <<<dim3(output_size_i, output_size_j), dim3(1, 1) >>> (dev_c, dev_a, dev_b);
 
 
     // Check for any errors launching the kernel

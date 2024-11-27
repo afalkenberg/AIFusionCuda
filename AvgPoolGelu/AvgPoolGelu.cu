@@ -32,7 +32,7 @@ __global__ void avgGeluKernel(float* c, const float* a, const int* b)
         }
     }
 
-    int dj = matrixSize_i / stride_i; 
+    int dj = (matrixSize_i - kernelSize_i) / stride_i + 1 ; 
 
     sum = sum / (kernelSize_i * kernelSize_j);
             // (a[2*i + j*8] + 
@@ -100,7 +100,9 @@ cudaError_t avgGeluWithCuda(float *c, float *a, int *b, unsigned int inputSize, 
     // Launch a kernel on the GPU with one thread for each element.
     // avgGeluKernel<<<dim3(1,1), dim3(output_size_i, output_size_j)>>>(dev_c, dev_a, dev_b);
 
-    avgGeluKernel <<<dim3(output_size_i/4, output_size_j/4), dim3(4, 4) >> > (dev_c, dev_a, dev_b);
+//    avgGeluKernel <<<dim3(output_size_i/4, output_size_j/4), dim3(4, 4) >> > (dev_c, dev_a, dev_b);
+
+    avgGeluKernel << <dim3(output_size_i, output_size_j), dim3(1,1) >> > (dev_c, dev_a, dev_b);
 
 
     // Check for any errors launching the kernel

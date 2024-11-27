@@ -19,9 +19,9 @@ int cudaCall(int dim_i, int dim_j, bool merged)
     }
 
     int kernel_size_i = 8;
-    int kernel_size_j = 8;
+    int kernel_size_j = 16;
 
-    int stride_i = 8;
+    int stride_i = 16;
     int stride_j = 8;
 
     GoldenClass GC;
@@ -48,7 +48,7 @@ int cudaCall(int dim_i, int dim_j, bool merged)
     std::cout << " BOTH TIME " << avgGeluTime << std::endl;
 
     // GC.print();
-    // std::cout << " -------------- " << std::endl;
+    std::cout << " -------------- " << std::endl;
 
     GC.makeCudaInput(); 
 
@@ -71,7 +71,7 @@ int cudaCall(int dim_i, int dim_j, bool merged)
 
     cudaEnd = clock(); 
     GC.makeCudaOutput(); 
-    //GC.printCuda();
+    // GC.printCuda();
 
     if (merged == false) {
         cudaAvgTime = ((double)(cudaGeluStart - cudaStart)) / CLOCKS_PER_SEC;
@@ -94,8 +94,8 @@ int cudaCall(int dim_i, int dim_j, bool merged)
 
 int main(int argc, char** arg)
 {
-    std::vector<int> dim_i = { 128, 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536, 1664, 1792, 1920, 2048, 2176, 2304, 2432, 2560, 2688, 2816, 2944, 3072};
-    std::vector<int> dim_j = { 512, 1024, 1536, 2048, 2560, 3072 };
+    std::vector<int> dim_i = { 128 , 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536, 1664, 1792, 1920, 2048, 2176, 2304, 2432, 2560, 2688, 2816, 2944, 3072 };
+    std::vector<int> dim_j = { 256 , 512, 1024, 1536, 2048, 2560, 3072 };
 
     for (int dj : dim_j) {
         std::cout << " ____not merged ____________ " << dj << " ------------ " << std::endl;

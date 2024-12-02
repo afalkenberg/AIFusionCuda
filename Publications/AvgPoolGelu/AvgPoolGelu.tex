@@ -4,6 +4,8 @@
 \usepackage{helvet}
 \usepackage{courier}
 \usepackage{pgfplots}
+\usepackage{amsmath}
+
  \pgfplotsset{compat=newest}
 \frenchspacing
 \setlength{\pdfpagewidth}{8.5in}
@@ -50,9 +52,15 @@ Different solutions were executed to compare the runtime of a AvgPool2D operator
 
 \subsection{AvgPool2D kernel implementation}
 The implementation of the AvgPool2D kernel is based on the following mathematical representation:
- 
-\(avgPool2D(N_i, C_j, h, w)  = \frac{1}{kH * kW} \sum_{m=0}^{kH-1} \sum_{n=0}^{kW-1}
-                               input(N_i, C_j, stride[0] \times h + m, stride[1] \times w + n)\)
+
+\begin{equation}
+\begin{aligned}
+\label{eq::avgPoolEq} 
+avgPool2D(N_i, C_j, h, w)  =  \frac{1}{kH * kW}  \sum_{m=0}^{kH-1} \sum_{n=0}^{kW-1} \\
+                               input(N_i, C_j, stride[0] \times h + m, stride[1] \times w + n)
+\end{aligned}
+\end{equation}
+
 
 The kernel is implemented in CUDA. The inner two loops are implemented on each of the nodes, which therefore would perform \(kH *kW\) operations each. The outer loops are mapped to the nodes of the CUDA hardware.  
 
@@ -60,7 +68,13 @@ The kernel is implemented in CUDA. The inner two loops are implemented on each o
 
 The gelu kernel is based on the following mathematical definition:  
 
-\( GELU(x) = 0.5 * x * (1 + \tanh(\sqrt{2 / \pi} * (x + 0.044715 * x^3)))\)
+\begin{equation}
+\label{eq::geluEq} 
+GELU(x) = 0.5 * x * (1 + \tanh(\sqrt{2 / \pi} * (x + 0.044715 * x^3)))
+\end{equation}
+
+
+
 
 Each kernel performs the above Gelu operation, therefore mulitple of these operations can be mapped onto the CUDA platform to be executed in parallel. For this specific exercise there is no further optimization performed and the original Gelu function is used as in Figure~\ref{geluFunc}. Nevertheless it is recognized that there are proposals to improve the Gelu operation considerably by using partial functions with linear approximations. 
 
@@ -110,7 +124,7 @@ The first result is based on a CPU implementation of AvgPool2D in C++ on a PC. I
 
 \subsection{AvgPool2D in sequence with Gelu on CPU}
 
-The Figure~\ref{cpuAvgPooGelu} shows the result for AvgPool2D with Gelu in sequence. The inclusion of Gelu hardly contributes to the overall result on CPU. 
+The next implementation combines the AvgPool2D algorithm with Gelu. Since it is performed on the CPU we do not need to make a difference between the sequential and the parallel execution as well as the combined execution of the two operators. 
 
 \begin{figure}
 \begin{tikzpicture}
@@ -132,6 +146,8 @@ The Figure~\ref{cpuAvgPooGelu} shows the result for AvgPool2D with Gelu in seque
 \caption{AvgPool2D with Gelu on CPU}
 \label{cpuAvgPoolGelu}
 \end{figure}
+
+The Figure~\ref{cpuAvgPoolGelu} shows the result for AvgPool2D with Gelu in sequence. The inclusion of Gelu hardly contributes to the overall result on CPU. 
 
 In Figure~\ref{cpuWithWithout} a direct comparisong of AvgPool2D without and with Gelu is shown. It is recognized that exercising Gelu on a CPU does not significantly change the overall runtime. The main explanation is that there is no additional allocation of memory involved since Gelu directly writes back to the same element. Further the number of elements is reduced now by 64, because the avgPool2D operation uses a 8x8 inner dimensions for our example.
 
@@ -283,6 +299,7 @@ We conclude that kernel fusion has a significant impact on the performance and t
 
 The herein presented results are based on the implementation of a new CUDA based library, which concentrates solely on fused kernels for AI workloads. 
 
+\section{References}
 [] https://arxiv.org/abs/2108.13342
 [] https://dl.acm.org/doi/10.1145/3520142
 

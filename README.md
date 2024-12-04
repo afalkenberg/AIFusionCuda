@@ -1,2 +1,4 @@
 # AIFusionCuda
-This is a collection of fused AI cuda kernels
+This is some code to compare a kernel which does AvgPool, Gelu and 
+a fused version thereof.
+

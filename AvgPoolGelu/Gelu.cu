@@ -1,45 +1,52 @@
-
-
-#include "AvgPool.cuh"
-
+#include "Gelu.cuh"
 #include <stdio.h>
 #include <iostream>
 
-__global__ void geluKernel(float* c, const float* a, const int* b)
+template <typename T> 
+__global__ void geluKernel(T* c, const T* a, const int* b)
 {
-    // int i = threadIdx.x; // [0 1]  
+    T sqrt2Divpi; 
+    T par1; 
+    T par2;
+    T one;
+
+    if (std::is_same<T, half>::value) {
+        sqrt2Divpi = __float2half(0.7978845608028654f);
+        par1 = __float2half(0.044715f); 
+        par2 = __float2half(0.5f); 
+        one  = CUDART_ONE_FP16;
+    }
+    else {
+        sqrt2Divpi = 0.7978845608028654f;
+        par1 = 0.044715f;
+        par2 = 0.5f;
+        one  = 1.0f;
+    }
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // int j = threadIdx.y; // [0 1]  
-
     int j = blockIdx.y * blockDim.y + threadIdx.y;
-
     int matrixSize_i = b[0];
     int matrixSize_j = b[1];
-   
-    float sum = a[i + matrixSize_i * j];
-    // (a[2*i + j*8] + 
-    // a[2*i + 1 + j*8] + 
-    // a[2*i + j*8 + 4] + 
-    // a[2 * i + 1 + j * 8 + 4]) / 4.0;
-
-// put gelu here // 
-
-    float sqrt2Divpi = 0.7978845608028654;
-
-    c[i + matrixSize_i * j] = 0.5f * sum * (1 + tanhf(sqrt2Divpi * (sum + 0.044715 * (sum * sum * sum))));
-
+    T sum = a[i + matrixSize_i * j];
+    T x0 = sqrt2Divpi * (sum + par1 * (sum * sum * sum));
+    T par3;
+    if (std::is_same<T, half>::value) {
+        T two = __float2half(2.0f);
+        par3 = __float2half(tanhf(__half2float(x0))); // why does intrinsic hexp (e^2x - 1)/(e^2x + 1) not work ?  
+    }
+    else {
+        par3 = tanhf(x0);
+    }
+    c[i + matrixSize_i * j] = par2 * sum * (one + par3);
 }
 
 
-
-// Helper function for using CUDA to avgGelu vectors in parallel.
-cudaError_t geluWithCuda(float* c, float* a, int* b, unsigned int output_size_i, unsigned int output_size_j)
+template <typename T>
+cudaError_t geluWithCuda<T>(T* c, T* a, int* b, unsigned int output_size_i, unsigned int output_size_j)
 {
-    float* dev_a = 0;
+    T* dev_a = 0;
     int* dev_b = 0;
-    float* dev_c = 0;
+    T* dev_c = 0;
     cudaError_t cudaStatus;
 
     // Choose which GPU to run on, change this on a multi-GPU system.
@@ -50,13 +57,13 @@ cudaError_t geluWithCuda(float* c, float* a, int* b, unsigned int output_size_i,
     }
 
     // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc((void**)&dev_c, output_size_i * output_size_j * sizeof(float));
+    cudaStatus = cudaMalloc((void**)&dev_c, output_size_i * output_size_j * sizeof(T));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
         goto Error;
     }
 
-    cudaStatus = cudaMalloc((void**)&dev_a, output_size_i * output_size_j * sizeof(float));
+    cudaStatus = cudaMalloc((void**)&dev_a, output_size_i * output_size_j * sizeof(T));
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMalloc failed!");
         goto Error;
@@ -69,7 +76,7 @@ cudaError_t geluWithCuda(float* c, float* a, int* b, unsigned int output_size_i,
     }
 
     // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_a, a, output_size_i * output_size_j * sizeof(float), cudaMemcpyHostToDevice);
+    cudaStatus = cudaMemcpy(dev_a, a, output_size_i * output_size_j * sizeof(T), cudaMemcpyHostToDevice);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
@@ -84,7 +91,7 @@ cudaError_t geluWithCuda(float* c, float* a, int* b, unsigned int output_size_i,
     // Launch a kernel on the GPU with one thread for each element.
     // avgGeluKernel<<<dim3(1,1), dim3(output_size_i, output_size_j)>>>(dev_c, dev_a, dev_b);
 
-    geluKernel <<<dim3(output_size_i, output_size_j), dim3(1, 1) >>> (dev_c, dev_a, dev_b);
+    geluKernel<T> <<<dim3(output_size_i, output_size_j), dim3(1, 1) >>> (dev_c, dev_a, dev_b);
 
 
     // Check for any errors launching the kernel
@@ -103,7 +110,7 @@ cudaError_t geluWithCuda(float* c, float* a, int* b, unsigned int output_size_i,
     }
 
     // Copy output vector from GPU buffer to host memory.
-    cudaStatus = cudaMemcpy(c, dev_c, output_size_i * output_size_j * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaStatus = cudaMemcpy(c, dev_c, output_size_i * output_size_j * sizeof(T), cudaMemcpyDeviceToHost);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
@@ -116,3 +123,8 @@ Error:
 
     return cudaStatus;
 }
+
+template cudaError_t geluWithCuda<float>(float* c, float* a, int* b, unsigned int output_size_i, unsigned int output_size_j);
+template cudaError_t geluWithCuda<double>(double* c, double* a, int* b, unsigned int output_size_i, unsigned int output_size_j);
+template cudaError_t geluWithCuda<half>(half* c, half* a, int* b, unsigned int output_size_i, unsigned int output_size_j);
+

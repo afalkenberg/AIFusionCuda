@@ -32,6 +32,8 @@ private:
 public:
 
 	void setInputs(std::vector<std::vector<float>>* inp, int k_size_i, int k_size_j, int st_i, int st_j);
+	void setInputs(std::vector<std::vector<int8_t>>* inp, int k_size_i, int k_size_j, int st_i, int st_j);
+
 
 	void AvgPool2d();
     void Gelu();

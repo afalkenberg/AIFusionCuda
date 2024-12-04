@@ -4,20 +4,36 @@
 #include "GoldenClass.h"
 #include<iostream> 
 
-
 void GoldenClass::setInputs(std::vector<std::vector<float>>* inp, int k_size_i, int k_size_j, int st_i, int st_j) {
     input = inp; 
     kernel_size_i = k_size_i;
     kernel_size_j = k_size_j;
     stride_i = st_i; 
     stride_j = st_j;
-
     input_height = input->size();
     input_width = (*input)[0].size();
-
     output_height = (input_height - kernel_size_j) / stride_j + 1;
     output_width = (input_width - kernel_size_i) / stride_i + 1;
+}
 
+void GoldenClass::setInputs(std::vector<std::vector<int8_t>>* inp, int k_size_i, int k_size_j, int st_i, int st_j) {
+    kernel_size_i = k_size_i;
+    kernel_size_j = k_size_j;
+    stride_i = st_i;
+    stride_j = st_j;
+    input_height = inp->size();
+    input_width = (*inp)[0].size();
+    output_height = (input_height - kernel_size_j) / stride_j + 1;
+    output_width = (input_width - kernel_size_i) / stride_i + 1;
+    input = new std::vector<std::vector<float>>;
+    for (int i = 0; i < input_height; i++) {
+        std::vector<float> finp;
+        for (int j = 0; j < input_width; j++) {
+            float val = (*inp)[i][j] / 128.0f;
+            finp.push_back(val);
+        }
+        input->push_back(finp);
+    }
 }
 
 void GoldenClass::AvgPool2d() {
@@ -51,7 +67,6 @@ void GoldenClass::Gelu() {
         }
     }
 }
-
 
 void GoldenClass::makeCudaInput() {
     cudaInput = new float[input_height * input_width];
@@ -124,7 +139,7 @@ int GoldenClass::runGeluCuda() {
 
     c = new float[output_height * output_width];
 
-    cudaStatus = geluWithCuda(c, avgOut, b, output_width, output_height);
+    cudaStatus = geluWithCuda<float>(c, avgOut, b, output_width, output_height);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "avgGeluWithCuda failed!");
         return 1;
@@ -184,9 +199,9 @@ void GoldenClass::print() {
 }
 
 void GoldenClass::printCuda() {
-    std::cout << output_height << " cout0 " << cudaOutput->size() << std::endl;
+    std::cout << output_height << " output_height " << cudaOutput->size() << std::endl;
     
-    std::cout << output_width << " cout1 " << (*cudaOutput)[0]->size() << std::endl;
+    std::cout << output_width << " output_width " << (*cudaOutput)[0]->size() << std::endl;
 
 
     for (const auto& row : *cudaOutput) {
@@ -206,7 +221,7 @@ unsigned int GoldenClass::getOutputHeight() {
 }
 
 int GoldenClass::countErrors()  {
-    float eps = 0.000001;
+    float eps = 0.0000001;
     int cnt = 0;
     for (int j = 0; j < output_height; ++j) {
         for (int i = 0; i < output_width; ++i) {

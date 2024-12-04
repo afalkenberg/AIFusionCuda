@@ -16,14 +16,12 @@ __global__ void avgGeluKernel(float* c, const float* a, const int* b)
 
     int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-
     int matrixSize_i = b[0];
     int matrixSize_j = b[1];
     int kernelSize_i = b[2];
     int kernelSize_j = b[3];
     int stride_i = b[4]; 
     int stride_j = b[5];
-
 
     float sum = 0.0;
     for (int ki = 0; ki < kernelSize_i; ki++) {
@@ -33,19 +31,9 @@ __global__ void avgGeluKernel(float* c, const float* a, const int* b)
     }
 
     int dj = (matrixSize_i - kernelSize_i) / stride_i + 1 ; 
-
     sum = sum / (kernelSize_i * kernelSize_j);
-            // (a[2*i + j*8] + 
-            // a[2*i + 1 + j*8] + 
-            // a[2*i + j*8 + 4] + 
-            // a[2 * i + 1 + j * 8 + 4]) / 4.0;
-
-    // put gelu here // 
-
     float sqrt2Divpi = 0.7978845608028654;
-
     c[i + dj * j] = 0.5f * sum * (1 + tanhf(sqrt2Divpi * (sum + 0.044715 * (sum * sum * sum))));
-
 }
 
 

@@ -8,24 +8,24 @@ int cudaCall(int dim_i, int dim_j, bool merged)
 
     // defining the inputs and golden //
 
-    std::vector<std::vector<float>> input; 
-    
+    std::vector<std::vector<int8_t>> input_int8; 
+
     for (int i = 0; i < dim_i; i++) {
-        std::vector<float> inp; 
+        std::vector<int8_t> inp;
         for (int j = 0; j < dim_j; j++) {
-            inp.push_back(rand()/32000.0f);
+            int8_t val = 128 * rand() / 32000.0f;
+            inp.push_back(val);
         }
-        input.push_back(inp);
+        input_int8.push_back(inp);
     }
 
     int kernel_size_i = 8;
     int kernel_size_j = 16;
-
     int stride_i = 16;
     int stride_j = 8;
 
     GoldenClass GC;
-    GC.setInputs(&input, kernel_size_i, kernel_size_j, stride_i, stride_j);
+    GC.setInputs(&input_int8, kernel_size_i, kernel_size_j, stride_i, stride_j);
     clock_t startAvgPool; 
     clock_t startGelu;
     clock_t endGelu;
@@ -88,14 +88,13 @@ int cudaCall(int dim_i, int dim_j, bool merged)
     std::cout << " compare " << GC.countErrors() << std::endl;
 
     GC.closeCuda(); 
-    std::cout << dim_i << " " << cudaTotalTime << std::endl;
     return 0;
 }
 
 int main(int argc, char** arg)
 {
-    std::vector<int> dim_i = { 128 , 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536, 1664, 1792, 1920, 2048, 2176, 2304, 2432, 2560, 2688, 2816, 2944, 3072 };
-    std::vector<int> dim_j = { 256 , 512, 1024, 1536, 2048, 2560, 3072 };
+    std::vector<int> dim_i = { 32, 256, 384, 512, 640, 768, 896, 1024, 1152, 1280, 1408, 1536, 1664, 1792, 1920, 2048, 2176, 2304, 2432, 2560, 2688, 2816, 2944, 3072 };
+    std::vector<int> dim_j = { 32, 256, 512, 1024, 1536, 2048, 2560, 3072 };
 
     for (int dj : dim_j) {
         std::cout << " ____not merged ____________ " << dj << " ------------ " << std::endl;

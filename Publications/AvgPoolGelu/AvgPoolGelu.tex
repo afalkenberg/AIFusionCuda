@@ -15,9 +15,9 @@
 /Author (Andreas Falkenberg)}
 \setcounter{secnumdepth}{0}  
  \begin{document}
-\title{Acceleration of CUDA kernels by Fusion \\ Measurements for AvgPool2D and Gelu}
+\title{Acceleration of CUDA Kernels through Fusion \\ Measurements for AvgPool2D and Gelu}
 \author{Andreas Falkenberg\\
-Dr Falkenberg Technology Consulting Corp\\
+Dr Falkenberg Technology Consulting Inc\\
 366 Somerset Hills Glen\\
 Escondido, California 92026\\
 }
@@ -33,25 +33,25 @@ The need to accelerate LLM (large language models) requires the use of always ad
 
 \noindent
 
-One advanced optimization step is the use of fused operations. Operator fusion is one of the techniques, which allow a considerable improvement of the throughput of large language models running on accelerator hardware. It targets the shortcomings of using accelerators, which require to upload and download the data between each operation. This process is considerably shortend by the use of operator fusion. This paper specifically provides some measurements of the direct improvement of operator fusion by comparing operator performance with and without fusion being applied. In the paper the results of AvgPool2D operator fused with the Gelu operator is presented.
+One advanced optimization step in the development process of large language models (LLM) is the use of fused operators. Operator fusion is one of the techniques, which allow a considerable improvement of the throughput of an LLM running on accelerator hardware. It targets the shortcomings of using accelerators, which require to upload and download the data between each operation. This process is considerably shortend by the use of operator fusion. This paper specifically provides some measurements of the direct improvement of operator fusion by comparing operator performance with and without fusion being applied. In the paper the results of AvgPool2D operator fused with the Gelu operator is presented.
 
 
 \section{Introduction}
 
 In recent years the push for and the growth of Large Language Models (LLM) provided new challenges for processor and compiler developers to improve the throughput and performance of such models. The main challenge is to stay within the constraints of already existing hardware. Although hardware accelerators enter the market in relative rapid succession, companies may not be willing to upgrade their compute ressources with each new generation of processors and accelerators. Usually a software upgrade and tool upgrade is much more common and easier to achieve compared to an actual hardware upgrade.  
-Essentially there are two areas, which are targeted to improve performance of LLMs. First there is the improvement of the hardware by utilizing new hardware architectures and improving existing hardware architectures by adding specific features, which benefit the processing of neural network workloads. The other area is the improvement by software tools. Specifically AI compilers are under development, which boost the performance of exising hardware by utilizing the specific AI accelerating features. They also need to adapt quickly to support new features of new hardware. These optimizations are often in the area of parallel execution of workloads, faster data transfer between nodes and faster loading of kernels into the hardware to name a few. 
-One newer optimization technique is the fusion of multiple neural network nodes into one single node. Thereby a set of operators are identified as fuseable, combined into one operator and finally mapped to the appropriate fused kernel. This paper discusses fusion of a AvgPool2D operator with a Gelu operator. The following sections provide a brief discussion of the underlying idea, then discuss some of the implementation and test features and environment. Lastly measured results are presented and a conclusion is given. 
+Essentially there are two areas, which are targeted to improve performance of LLMs. First there is the improvement of the hardware by utilizing new hardware architectures and improving existing hardware architectures by adding specific features, which benefit the processing of neural network workloads. The other area is the improvement by software tools. Specifically AI compilers are under development, which boost the performance of exising hardware by utilizing the specific AI accelerating features. \shortcite{7783725} \shortcite{10.1145/3520142} \shortcite{9443851} They also need to adapt quickly to support new features of new hardware. These optimizations are often in the area of parallel execution of workloads, faster data transfer between nodes and faster loading of kernels into the hardware to name a few. 
+One newer optimization technique is the fusion of multiple neural network nodes into one single node. Thereby a set of operators are identified as fuseable, combined into one operator and finally mapped to the appropriate fused kernel. This paper discusses fusion of a AvgPool2D \shortcite {wang2021bambalancedattentionmechanism} operator with a Gelu operator. \shortcite{boehm2018optimizingoperatorfusionplans} The following sections provide a brief discussion of the underlying idea, then discuss some of the implementation and test features and environment. Lastly measured results are presented and a conclusion is given. 
 
 \section{Motivation} 
 
 A neural network workload constitutes of many nodes which mostly are executed individually or in eager mode. Eager mode means even with accelerating hardware, each node is executed on an individual basis and therefore the data is loaded in and out of the accelerator after each operation. A huge amount of data may be loaded to the accelerator, which then in a very aggressive highly parallel effort, performs such an operation quickly utilizing the parallel feature of the hardware accelerator and then load the result of said operation back to the host processor. A second node is processed in the exact same way, which means that the same or maybe a reduced or enlarged amount of data is loaded into the accelerator and the appropriate process is performed again. The neverthless means that data which might as well be processed within the same hardware is uploaded and downloaded between processing steps albeit being already at the correct location or stored in the correct memory.  
-By fusing nodes the additional upload and download step of interim results are removed and the appropriate steps are directly performed. This usually leads to a considerable improvement in throughput and performance of the exact same model. We can see this specifically in the combination of matrix multiplication with immediately following activation functions. The optimization of matrix multiplication and its fusion with activation functions seems to be already widely discussed[]. What is also mentioned in many publications is the overall impact on existing models, whereas there is little to no discussion about the impact of the individual contributing node, which would be an utmost important tool for developers of original neural network architectures. In this paper we discuss one specific combination of operations, which are very common in the context of Large Language Models. The first is the avgPool2D function and the second is the gelu function. Other publications will follow to discuss other combinations of operations. 
+By fusing nodes the additional upload and download step of interim results are removed and the appropriate steps are directly performed. This usually leads to a considerable improvement in throughput and performance of the exact same model. We can see this specifically in the combination of matrix multiplication with immediately following activation functions. The optimization of matrix multiplication and its fusion with activation functions seems to be already widely discussed \shortcite{Acharya_2020}, \shortcite{li2023deepmodelfusionsurvey}. What is also mentioned in many publications is the overall impact on existing models, whereas there is little to no discussion about the impact of the individual contributing node, which would be an utmost important tool for developers of original neural network architectures. In this paper we discuss one specific combination of operations, which are very common in the context of Large Language Models. The first is the avgPool2D function and the second is the gelu function. Other publications will follow to discuss other combinations of operations. 
 
 \section{The Approach}
 Different solutions were executed to compare the runtime of a AvgPool2D operator and a Gelu operator between CPU and CUDA solutions. A small model with one AvgPool2D operator and one Gelu operator with flexible shapes is implemented in C++ to run on a CPU. Then a total of three kernels are developed in CUDA. The first kernel represents the AvgPool2d operation, the second kernel represents the Gelu operator and the third kernel represents the fused kernel, which constitutes of the said AvgPool2D operator directly followed by tbe Gelu operator implemented in one CUDA kernel. 
 
 \subsection{AvgPool2D kernel implementation}
-The implementation of the AvgPool2D kernel is based on the following mathematical representation:
+The implementation of the AvgPool2D kernel is based on the mathematical representation shown in equation~\ref{eq::avgPoolEq}:
 
 \begin{equation}
 \begin{aligned}
@@ -66,7 +66,7 @@ The kernel is implemented in CUDA. The inner two loops are implemented on each o
 
 \subsection{Gelu kernel implementation}
 
-The gelu kernel is based on the following mathematical definition:  
+The gelu kernel is based on the mathematical definition in equation~\ref{eq::geluEq}:  
 
 \begin{equation}
 \label{eq::geluEq} 
@@ -273,9 +273,7 @@ The best result is achieved by using the fused kernel. The fused kernel incorpor
 
 \section{Conclusion}
 
-
-
-We conclude that kernel fusion has a significant impact on the performance and the throuput of a model. Although the fused kernel was not integrated into a realistic LLM workload this initial research already shows significant progress. The final figure combines the most significant results. We can see that only when a small matrix is used, i.e. at or below 128x3096, the CPU solution may be faster. 
+We conclude that kernel fusion has a significant impact on the performance and the throughput of a model. Although the fused kernel was not integrated into a realistic LLM workload this initial research already shows significant progress. The final figure combines the most significant results. We can see that only when a small matrix is used, i.e. at or below 128x3096, the CPU solution may be faster. 
 
 \begin{figure}
 \begin{tikzpicture}
@@ -296,21 +294,11 @@ We conclude that kernel fusion has a significant impact on the performance and t
 \end{figure}
 
 
-The herein presented results are based on the implementation of a new CUDA based library, which concentrates solely on fused kernels for AI workloads. 
+The herein presented results are based on the implementation of a new CUDA based library, which concentrates solely on fused kernels for AI workloads. The progress of this work can be followed at \shortcite{falkenberg2024AvgPoolGelu}
 
-\section{References}
-[] https://arxiv.org/abs/2108.13342
-[] https://dl.acm.org/doi/10.1145/3520142
-[] arXiv:1606.08415 Gaussian Error Linear Units (GELUs) Dan Hendrycks, Kevin Gimpel
 
-@misc{li2023deepmodelfusionsurvey,
-      title={Deep Model Fusion: A Survey}, 
-      author={Weishi Li and Yong Peng and Miao Zhang and Liang Ding and Han Hu and Li Shen},
-      year={2023},
-      eprint={2309.15698},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2309.15698}, 
-}
+\bibliography{AvgPoolGeluBib}
+\bibliographystyle{aaai}
 
+ 
 \end{document}

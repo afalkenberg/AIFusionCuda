@@ -1,0 +1,143 @@
+@article{Acharya_2020,
+   title={Effective Loop Fusion in Polyhedral Compilation Using Fusion Conflict Graphs},
+   volume={17},
+   ISSN={1544-3973},
+   url={http://dx.doi.org/10.1145/3416510},
+   DOI={10.1145/3416510},
+   number={4},
+   journal={ACM Transactions on Architecture and Code Optimization},
+   publisher={Association for Computing Machinery (ACM)},
+   author={Acharya, Aravind and Bondhugula, Uday and Cohen, Albert},
+   year={2020},
+   month=sep, pages={1–26} }
+
+@article{li2023deepmodelfusionsurvey,
+      title={Deep Model Fusion: A Survey}, 
+      author={Weishi Li and Yong Peng and Miao Zhang and Liang Ding and Han Hu and Li Shen},
+      year={2023},
+      eprint={2309.15698},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2309.15698}, 
+}
+
+@article{DBLP:journals/corr/abs-2108-13342,
+  author       = {Wei Niu and
+                  Jiexiong Guan and
+                  Yanzhi Wang and
+                  Gagan Agrawal and
+                  Bin Ren},
+  title        = {DNNFusion: Accelerating Deep Neural Networks Execution with Advanced
+                  Operator Fusion},
+  journal      = {CoRR},
+  volume       = {abs/2108.13342},
+  year         = {2021},
+  url          = {https://arxiv.org/abs/2108.13342},
+  eprinttype    = {arXiv},
+  eprint       = {2108.13342},
+  timestamp    = {Thu, 03 Aug 2023 15:52:37 +0200},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2108-13342.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{boehm2018optimizingoperatorfusionplans,
+      title={On Optimizing Operator Fusion Plans for Large-Scale Machine Learning in SystemML}, 
+      author={Matthias Boehm and Berthold Reinwald and Dylan Hutchison and Alexandre V. Evfimievski and Prithviraj Sen},
+      year={2018},
+      eprint={1801.00829},
+      archivePrefix={arXiv},
+      primaryClass={cs.DB},
+      url={https://arxiv.org/abs/1801.00829}, 
+}
+
+@article{10.1145/3200691.3178507,
+author = {Jangda, Abhinav and Bondhugula, Uday},
+title = {An effective fusion and tile size model for optimizing image processing pipelines},
+year = {2018},
+issue_date = {January 2018},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {53},
+number = {1},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/3200691.3178507},
+doi = {10.1145/3200691.3178507},
+abstract = {Effective models for fusion of loop nests continue to remain a challenge in both general-purpose and domain-specific language (DSL) compilers. The difficulty often arises from the combinatorial explosion of grouping choices and their interaction with parallelism and locality. This paper presents a new fusion algorithm for high-performance domain-specific compilers for image processing pipelines. The fusion algorithm is driven by dynamic programming and explores spaces of fusion possibilities not covered by previous approaches, and is driven by a cost function more concrete and precise in capturing optimization criteria than prior approaches. The fusion model is particularly tailored to the transformation and optimization sequence applied by PolyMage and Halide, two recent DSLs for image processing pipelines. Our model-driven technique when implemented in PolyMage provides significant improvements (up to 4.32X) over PolyMage's approach (which uses auto-tuning to aid its model), and over Halide's automatic approach (by up to 2.46X) on two state-of-the-art shared-memory multicore architectures.},
+journal = {SIGPLAN Not.},
+month = feb,
+pages = {261–275},
+numpages = {15},
+keywords = {fusion, image processing pipelines, tiling}
+}
+
+@misc{hendrycks2023gaussianerrorlinearunits,
+      title={Gaussian Error Linear Units (GELUs)}, 
+      author={Dan Hendrycks and Kevin Gimpel},
+      year={2023},
+      eprint={1606.08415},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1606.08415}, 
+}
+
+@article{10.1145/3520142,
+author = {Cai, Xuyi and Wang, Ying and Zhang, Lei},
+title = {Optimus: An Operator Fusion Framework for Deep Neural Networks},
+year = {2022},
+issue_date = {January 2023},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {22},
+number = {1},
+issn = {1539-9087},
+url = {https://doi.org/10.1145/3520142},
+doi = {10.1145/3520142},
+abstract = {The reduction of neural parameters and operations for the applications on embedded and IoT platforms in current deep neural network (DNN) architectures has received increasing attention. Relatively, the intermediate feature maps of such lightweight neural networks begin to grow and usually outsize the on-chip memory as the new bottleneck, which introduces considerable power-consuming off-chip memory accesses. To reduce the feature-induced memory accesses, operator fusion has been proposed to parallelize the execution of multiple convolutional layers and shown significant reduction of off-chip memory accesses. However, how to fuse the neural operators is still a challenging issue that heavily depends on both the neural network (NN) topology and the specific DNN accelerator configuration. In this work, we observed prior operator fusion approaches fail to guarantee memory-level optimality as they search in the constrained operator fusion design space. Considering the complexity of the NN topologies and the constrained resources of the DNN accelerators, we develop a novel operator fusion framework, Optimus. Optimus includes an accurate memory cost model dedicated to the scheduler to evaluate the potential operator-fusion schemes and a directed acyclic graph-based operator fusion algorithm for both off-line and on-line workload deployment scenarios, which altogether generates high-efficiency operator-fusion solutions for arbitrary network models running on DNN accelerators. The experimental results show that Optimus reduces 17–75\% off-chip memory accesses and obtains 1.86\texttimes{}–3.66\texttimes{} energy efficiency on state-of-the-art DNN workloads when compared to the baselines and brings significant power-efficiency boost to the DNN accelerators of different architectures and dataflows.},
+journal = {ACM Trans. Embed. Comput. Syst.},
+month = oct,
+articleno = {1},
+numpages = {26},
+keywords = {layer fusion, memory, embedded processor, Neural network}
+}
+
+@article{7783725,
+  author={Alwani, Manoj and Chen, Han and Ferdman, Michael and Milder, Peter},
+  booktitle={2016 49th Annual IEEE/ACM International Symposium on Microarchitecture (MICRO)}, 
+  title={Fused-layer CNN accelerators}, 
+  year={2016},
+  volume={},
+  number={},
+  pages={1-12},
+  keywords={System-on-chip;Bandwidth;Random access memory;Neural networks;Convolution;Field programmable gate arrays;Data transfer},
+  doi={10.1109/MICRO.2016.7783725}}
+
+@article{9443851,
+  author={Liu, Zihan and Leng, Jingwen and Chen, Quan and Li, Chao and Zheng, Wenli and Li, Li and Guo, Minyi},
+  booktitle={2020 IEEE Intl Conf on Parallel & Distributed Processing with Applications, Big Data & Cloud Computing, Sustainable Computing & Communications, Social Computing & Networking (ISPA/BDCloud/SocialCom/SustainCom)}, 
+  title={DLFusion: An Auto-Tuning Compiler for Layer Fusion on Deep Neural Network Accelerator}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={118-127},
+  keywords={Fuses;Computational modeling;Neural networks;C++ languages;Feature extraction;Hardware;Generators;Auto-Tuning;Layer Fusion;Hardware Accelerator},
+  doi={10.1109/ISPA-BDCloud-SocialCom-SustainCom51426.2020.00041}}
+
+@article{wang2021bambalancedattentionmechanism,
+      title={BAM: A Balanced Attention Mechanism for Single Image Super Resolution}, 
+      author={Fanyi Wang and Haotian Hu and Cheng Shen},
+      year={2021},
+      eprint={2104.07566},
+      archivePrefix={arXiv},
+      primaryClass={eess.IV},
+      url={https://arxiv.org/abs/2104.07566}, 
+}
+
+@article{falkenberg2024AvgPoolGelu,
+      title={AvgPool2d and Gelu Fusion https://github.com/afalkenberg/AIFusionCuda}, 
+      author={Andreas Falkenberg},
+      year={2024},
+      url={https://github.com/afalkenberg/AIFusionCuda}, 
+}
+
+
+

@@ -26,7 +26,7 @@ Escondido, California 92026\\
 
 \begin{abstract}
 \begin{quote}
-The need to accelerate LLM (large language models) requires the use of always advancing compiler technologies. Operator fusion is one of the promising techniques to considerably improve the throughput of LLMs.
+The need to accelerate LLM (large language models) requires the use of always advancing compiler technologies. Operator fusion is one of the promising techniques to considerably improve the throughput of LLMs. This paper discusses the impact of operator fusion on the direct operator performans. The paper compares throughputs between pure CPU implementation, versus two kernel implementations versus a fused single kernel solution.  
 
 \end{quote}
 \end{abstract}
@@ -38,9 +38,9 @@ One advanced optimization step is the use of fused operations. Operator fusion i
 
 \section{Introduction}
 
-In recent years the push for and the growth of Large Language Models (LLM) provided new challenges for processor and compiler developers to improve the throughput and performance of such models. The main challenge is to stay within the constraints of already existing hardware. Although hardware accelerators entering the market in relative rapid succession, companies may not be willing to upgrade their compute ressources with each new generation of processors and accelerators. Usually a software upgrade and tool upgrade is much more common and easier to achieve compared to an actual hardware upgrade.  
-Essentially there are two areas, which are targeted to improve performance of LLMs. First there is the improvement of the hardware by utilizing new hardware architectures and improving existing hardware architectures by adding specific features, which benefit the processing of neural network workloads. The other area is the improvement by software tools. Specifically AI compilers are under development, which boost the performance of exising hardware by utilizing the specific AI accelerating features, and also need to adapt quickly to support new features of new hardware. These optimizations are often in the area of parallel execution of workloads, faster data transfer between nodes and faster loading of kernels into the hardware to name a few. 
-One newer optimization technique is the fusion of multiple neural network nodes into one single node. This paper discusses fusion of a AvgPool2D operator with a Gelu operator. The following sections provide a brief discussion of the underlying idea, then discuss some of the implementation and test features and environment. Lastly measured results are presented and a conclusion is given. 
+In recent years the push for and the growth of Large Language Models (LLM) provided new challenges for processor and compiler developers to improve the throughput and performance of such models. The main challenge is to stay within the constraints of already existing hardware. Although hardware accelerators enter the market in relative rapid succession, companies may not be willing to upgrade their compute ressources with each new generation of processors and accelerators. Usually a software upgrade and tool upgrade is much more common and easier to achieve compared to an actual hardware upgrade.  
+Essentially there are two areas, which are targeted to improve performance of LLMs. First there is the improvement of the hardware by utilizing new hardware architectures and improving existing hardware architectures by adding specific features, which benefit the processing of neural network workloads. The other area is the improvement by software tools. Specifically AI compilers are under development, which boost the performance of exising hardware by utilizing the specific AI accelerating features. They also need to adapt quickly to support new features of new hardware. These optimizations are often in the area of parallel execution of workloads, faster data transfer between nodes and faster loading of kernels into the hardware to name a few. 
+One newer optimization technique is the fusion of multiple neural network nodes into one single node. Thereby a set of operators are identified as fuseable, combined into one operator and finally mapped to the appropriate fused kernel. This paper discusses fusion of a AvgPool2D operator with a Gelu operator. The following sections provide a brief discussion of the underlying idea, then discuss some of the implementation and test features and environment. Lastly measured results are presented and a conclusion is given. 
 
 \section{Motivation} 
 
@@ -72,7 +72,6 @@ The gelu kernel is based on the following mathematical definition:
 \label{eq::geluEq} 
 GELU(x) = 0.5 * x * (1 + \tanh(\sqrt{2 / \pi} * (x + 0.044715 * x^3)))
 \end{equation}
-
 
 
 
@@ -302,7 +301,16 @@ The herein presented results are based on the implementation of a new CUDA based
 \section{References}
 [] https://arxiv.org/abs/2108.13342
 [] https://dl.acm.org/doi/10.1145/3520142
+[] arXiv:1606.08415 Gaussian Error Linear Units (GELUs) Dan Hendrycks, Kevin Gimpel
 
-
+@misc{li2023deepmodelfusionsurvey,
+      title={Deep Model Fusion: A Survey}, 
+      author={Weishi Li and Yong Peng and Miao Zhang and Liang Ding and Han Hu and Li Shen},
+      year={2023},
+      eprint={2309.15698},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2309.15698}, 
+}
 
 \end{document}

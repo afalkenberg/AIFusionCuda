@@ -5,39 +5,20 @@
 template <typename T> 
 __global__ void geluKernel(T* c, const T* a, const int* b)
 {
-    T sqrt2Divpi; 
-    T par1; 
-    T par2;
-    T one;
+    T par2 = (T)0.5f;
+    T par1 = (T)0.044715f;
+    T sqrt2Divpi = (T)0.7978845608028654f;
+    T one = (T)1.0f;
 
-    if (std::is_same<T, half>::value) {
-        sqrt2Divpi = __float2half(0.7978845608028654f);
-        par1 = __float2half(0.044715f); 
-        par2 = __float2half(0.5f); 
-        one  = CUDART_ONE_FP16;
-    }
-    else {
-        sqrt2Divpi = 0.7978845608028654f;
-        par1 = 0.044715f;
-        par2 = 0.5f;
-        one  = 1.0f;
-    }
-
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = blockIdx.x * blockDim.x + threadIdx.x; 
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int matrixSize_i = b[0];
     int matrixSize_j = b[1];
     T sum = a[i + matrixSize_i * j];
     T x0 = sqrt2Divpi * (sum + par1 * (sum * sum * sum));
-    T par3;
-    if (std::is_same<T, half>::value) {
-        T two = __float2half(2.0f);
-        par3 = __float2half(tanhf(__half2float(x0))); // why does intrinsic hexp (e^2x - 1)/(e^2x + 1) not work ?  
-    }
-    else {
-        par3 = tanhf(x0);
-    }
-    c[i + matrixSize_i * j] = par2 * sum * (one + par3);
+    T tanVal;
+    tanVal = (T)tanhf(x0);
+    c[i + matrixSize_i * j] = par2 * sum * (one + tanVal);
 }
 
 
